@@ -7,16 +7,29 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
+/**
+ * Класс представляет из себя заготовку поискового движка в файловой системе. Движок позволяет подсчитывать
+ * количество вхождений строки (вводимой пользователем в строке поиска) в содержимое файла и, в зависимости от релевантности,
+ * показывать файлы в поисковой выдаче. Похоже, это простая реализация утилиты grep для Linux.
+ */
 public class Index {
+    // Поля invertedIndex и pool нужно сделать private, поскольку они представляют собой элементы внутренней реализации.
+
+    /** invertedIndex - базовая структура, хранит в себе поисковую выдачу */
     TreeMap<String, List<Pointer>> invertedIndex;
 
+    /** pool - сервис для создания и управления потоками */
     ExecutorService pool;
 
     public Index(ExecutorService pool) {
         this.pool = pool;
+        // Чтобы при мерже ветки не вылезали конфликты, лучше придерживаться одного стиля написания кода: this.invertedIndex
         invertedIndex = new TreeMap<>();
     }
 
+    /**
+     * Функция идет в указанную директорию и собирает список имеющихся в ней файлов.
+     * После этого запускает три задачи по поиску. */
     public void indexAllTxtInPath(String pathToDir) throws IOException {
         Path of = Path.of(pathToDir);
 
@@ -26,6 +39,8 @@ public class Index {
             stream.forEach(files::add);
         }
 
+        // Создаем три задачи. Возможно стоило бы проверить корректность их выполнения.
+        // Функция submit возвращает Future<?>, и с помощью него можно сделать проверку.
         pool.submit(new IndexTask(files));
         pool.submit(new IndexTask(files));
         pool.submit(new IndexTask(files));
@@ -35,14 +50,25 @@ public class Index {
         return invertedIndex;
     }
 
+
+    /**
+     * Это API движка. Функция позволяет получить список файлов для
+     * релевантной выдачи пользователю. */
     public List<Pointer> GetRelevantDocuments(String term) {
         return invertedIndex.get(term);
     }
 
+    /**
+     * Эта функция позволяет получить самый релевантный файл
+     * (в котором чаще других встречается вводимое пользователем слово). */
     public Optional<Pointer> getMostRelevantDocument(String term) {
         return invertedIndex.get(term).stream().max(Comparator.comparing(o -> o.count));
     }
 
+
+    /**
+     * Вспомогательный класс, реализует указатель на конкретный файл в файловой
+     * системе и подсчитывает количество вхождений в содержимое этого файла строки, вводимой пользователем. */
     static class Pointer {
         private Integer count;
         private String filePath;
@@ -58,6 +84,9 @@ public class Index {
         }
     }
 
+    /**
+     * Класс-исполнитель. Позволяет запустить движок в несколько параллельных задач
+     * и реализует основной функционал поиска. */
     class IndexTask implements Runnable {
 
         private final BlockingQueue<Path> queue;
@@ -66,6 +95,11 @@ public class Index {
             this.queue = queue;
         }
 
+
+        /**
+         * Ключевой функционал. С помощью вспомогательного класса Pointer данная
+         * функция считает количество вхождений строки в содержимое файла и сохраняет
+         * искомую информацию в базовую структуру invertedIndex. То есть заполняет дерево поисковой выдачи */
         @Override
         public void run() {
             try {
@@ -91,13 +125,10 @@ public class Index {
 
                         return pointers;
                     }
-
                 }));
-
             } catch (InterruptedException | IOException e) {
                 throw new RuntimeException();
             }
         }
     }
-
 }
