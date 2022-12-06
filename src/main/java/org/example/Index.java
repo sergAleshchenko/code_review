@@ -47,26 +47,25 @@ public class Index {
     }
 
     /**
-     * Это API движка. Функция возвращает дерево выдачи. */
+     * API движка. Функция возвращает дерево выдачи. */
     public TreeMap<String, List<Pointer>> getInvertedIndex() {
         return invertedIndex;
     }
 
 
     /**
-     * Это API движка. Функция позволяет получить список файлов для
-     * релевантной выдачи пользователю. */
+     * API движка. Функция позволяет получить дерево выдачи для
+     * поискового запроса. */
     public List<Pointer> GetRelevantDocuments(String term) {
         return invertedIndex.get(term);
     }
 
     /**
-     * Это API движка. Эта функция позволяет получить самый релевантный файл
-     * (в котором чаще других встречается вводимое пользователем слово). */
+     * API движка. Эта функция позволяет получить самый релевантный файл (для поискового запроса),
+     * в котором чаще других встречается вводимое пользователем слово. */
     public Optional<Pointer> getMostRelevantDocument(String term) {
         return invertedIndex.get(term).stream().max(Comparator.comparing(o -> o.count));
     }
-
 
     /**
      * Вспомогательный класс, реализует указатель на конкретный файл в файловой
