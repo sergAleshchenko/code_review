@@ -46,6 +46,8 @@ public class Index {
         pool.submit(new IndexTask(files));
     }
 
+    /**
+     * Это API движка. Функция возвращает дерево выдачи. */
     public TreeMap<String, List<Pointer>> getInvertedIndex() {
         return invertedIndex;
     }
@@ -59,7 +61,7 @@ public class Index {
     }
 
     /**
-     * Эта функция позволяет получить самый релевантный файл
+     * Это API движка. Эта функция позволяет получить самый релевантный файл
      * (в котором чаще других встречается вводимое пользователем слово). */
     public Optional<Pointer> getMostRelevantDocument(String term) {
         return invertedIndex.get(term).stream().max(Comparator.comparing(o -> o.count));
@@ -70,6 +72,7 @@ public class Index {
      * Вспомогательный класс, реализует указатель на конкретный файл в файловой
      * системе и подсчитывает количество вхождений в содержимое этого файла строки, вводимой пользователем. */
     static class Pointer {
+        // Класс можно сделать private, поскольку он является элементов внутренней реализации
         private Integer count;
         private String filePath;
 
@@ -88,7 +91,7 @@ public class Index {
      * Класс-исполнитель. Позволяет запустить движок в несколько параллельных задач
      * и реализует основной функционал поиска. */
     class IndexTask implements Runnable {
-
+        // Класс можно сделать private, поскольку он является элементов внутренней реализации
         private final BlockingQueue<Path> queue;
 
         public IndexTask(BlockingQueue<Path> queue) {
