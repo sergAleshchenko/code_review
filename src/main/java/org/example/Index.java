@@ -42,7 +42,6 @@ public class Index {
         // Создаем три задачи (зачем три?). Задачи никак не синхронизированы между собой, нужно это сделать.
         // Также возможно стоило бы проверить корректность их выполнения: метод Future.get
         // вернет null в случае успешного выполнения
-
         pool.submit(new IndexTask(files));
         pool.submit(new IndexTask(files));
         pool.submit(new IndexTask(files));
@@ -73,8 +72,10 @@ public class Index {
      * Вспомогательный класс, который реализует указатель на конкретный файл в файловой
      * системе и хранит количество вхождений в содержимое этого файла строки, вводимой пользователем. */
     static class Pointer {
-        // Класс можно сделать private, поскольку он является элементов внутренней реализации
+        // Класс можно сделать private, поскольку он является элементом внутренней реализации
         private Integer count;
+
+        // filePath можно сделать final, поскольку для текущего объекта Pointer данное поле фиксировано и не меняется
         private String filePath;
 
         public Pointer(Integer count, String filePath) {
@@ -92,7 +93,7 @@ public class Index {
      * Класс-исполнитель. Позволяет запустить движок в несколько параллельных задач
      * и реализует основной функционал поиска. */
     class IndexTask implements Runnable {
-        // Класс можно сделать private, поскольку он является элементов внутренней реализации
+        // Класс можно сделать private, поскольку он является элементом внутренней реализации
         private final BlockingQueue<Path> queue;
 
         public IndexTask(BlockingQueue<Path> queue) {
