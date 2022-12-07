@@ -29,7 +29,7 @@ public class Index {
 
     /**
      * Функция идет в указанную директорию и собирает список имеющихся в ней файлов.
-     * После этого запускает три задачи по поиску. */
+     * После этого запускает задачи по поиску. */
     public void indexAllTxtInPath(String pathToDir) throws IOException {
         Path of = Path.of(pathToDir);
 
@@ -39,8 +39,10 @@ public class Index {
             stream.forEach(files::add);
         }
 
-        // Создаем три задачи. Возможно стоило бы проверить корректность их выполнения.
-        // Функция submit возвращает Future<?>, и с помощью него можно сделать проверку.
+        // Создаем три задачи (зачем три?). Задачи никак не синхронизированы между собой, нужно это сделать.
+        // Также возможно стоило бы проверить корректность их выполнения: метод Future.get
+        // вернет null в случае успешного выполнения
+
         pool.submit(new IndexTask(files));
         pool.submit(new IndexTask(files));
         pool.submit(new IndexTask(files));
